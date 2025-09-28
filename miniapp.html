@@ -4,78 +4,48 @@
   <meta charset="UTF-8">
   <title>MiniApp: Сбор семантического ядра</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f7f7f7;
-    }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 { text-align: center; }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #0088cc;
-      color: #fff;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background-color: #006699; }
-    .status { margin-top: 15px; text-align: center; color: green; }
+    body { font-family: Arial; background: #f7f7f7; margin: 20px; }
+    .container { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    input, button { width: 100%; padding: 10px; margin: 5px 0; font-size: 16px; }
+    button { background: #0088cc; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #006699; }
+    .status { margin-top: 10px; text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Сбор семантического ядра</h2>
-    <input type="text" id="phraseInput" placeholder="Введите фразу">
-    <input type="text" id="regionInput" placeholder="Введите регион">
+    <input id="phraseInput" placeholder="Фраза">
+    <input id="regionInput" placeholder="Регион">
     <button id="sendDataBtn">Получить файл</button>
     <div class="status" id="status"></div>
   </div>
 
   <script>
-    // Telegram WebApp API
-    const tg = window.Telegram.WebApp;
-
-    tg.expand(); // развернуть окно на максимум
-
+    const tg = window.Telegram?.WebApp;
     const statusDiv = document.getElementById("status");
     const phraseInput = document.getElementById("phraseInput");
     const regionInput = document.getElementById("regionInput");
     const sendBtn = document.getElementById("sendDataBtn");
 
-    sendBtn.addEventListener("click", function() {
-      const phrase = phraseInput.value.trim();
-      const region = regionInput.value.trim();
-
-      if (!phrase || !region) {
-        statusDiv.style.color = "red";
-        statusDiv.textContent = "Заполните оба поля!";
-        return;
-      }
-
-      // Отправка данных боту
-      tg.sendData(JSON.stringify({ phrase, region }));
-
-      statusDiv.style.color = "green";
-      statusDiv.textContent = "Данные отправлены боту! Excel будет сформирован.";
-    });
+    if (!tg) {
+      statusDiv.style.color = "red";
+      statusDiv.textContent = "Откройте MiniApp через Telegram!";
+    } else {
+      tg.expand();
+      sendBtn.addEventListener("click", () => {
+        const phrase = phraseInput.value.trim();
+        const region = regionInput.value.trim();
+        if (!phrase || !region) {
+          statusDiv.style.color = "red";
+          statusDiv.textContent = "Заполните оба поля!";
+          return;
+        }
+        tg.sendData(JSON.stringify({ phrase, region }));
+        statusDiv.style.color = "green";
+        statusDiv.textContent = "Данные отправлены боту!";
+      });
+    }
   </script>
 </body>
 </html>
