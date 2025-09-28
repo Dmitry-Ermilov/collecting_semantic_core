@@ -1,34 +1,64 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Сбор СЯ</title>
-<style>
-body { font-family: Arial; margin: 20px; }
-input, select, button { padding: 10px; margin: 5px 0; width: 100%; }
-button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-button:hover { background-color: #45a049; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MiniApp — СЯ</title>
+  <style>
+    body { font-family: Arial; padding:16px; }
+    input, select { width: 100%; padding:8px; margin:8px 0; box-sizing:border-box; }
+    button { padding:10px 16px; font-size:16px; }
+    #log { margin-top:12px; color:#333; font-size:14px; white-space:pre-wrap; }
+  </style>
 </head>
 <body>
-<h2>Сбор Семантического Ядра</h2>
-<input id="phrase" placeholder="Введите фразу">
-<select id="region">
-<option value="225">Москва</option>
-<option value="187">Санкт-Петербург</option>
-<option value="216">Россия</option>
-</select>
-<button onclick="sendData()">Получить Excel</button>
+  <h3>Сбор СЯ — MiniApp</h3>
+  <input id="phrase" placeholder="Введите фразу" />
+  <select id="region">
+    <option value="0">Россия (0)</option>
+    <option value="1">Москва (1)</option>
+  </select>
+  <button id="send">Получить файл</button>
 
-<script>
-function sendData() {
-    const phrase = document.getElementById('phrase').value;
-    const region = document.getElementById('region').value;
+  <div id="log"></div>
 
-    if(!phrase) { alert('Введите фразу'); return; }
+  <script>
+    const logEl = document.getElementById('log');
+    function log(s){ console.log(s); logEl.textContent += s + '\n'; }
 
-    Telegram.WebApp.sendData(JSON.stringify({ phrase, region }));
-}
-</script>
+    // Telegram WebApp API
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      try { tg.ready(); log('WebApp ready'); } catch(e){ log('tg.ready() error: '+e); }
+    } else {
+      log('Ошибка: WebApp API не найден. Откройте этот miniapp **изнутри** приложения Telegram (кнопкой WebApp).');
+    }
+
+    document.getElementById('send').addEventListener('click', function(){
+      const phrase = (document.getElementById('phrase').value || '').trim();
+      const region = document.getElementById('region').value;
+
+      if (!phrase) { alert('Введите фразу'); return; }
+
+      const payload = { phrase, region, ts: Date.now() };
+
+      // 1) prefer tg.sendData when available
+      if (tg && typeof tg.sendData === 'function') {
+        try {
+          tg.sendData(JSON.stringify(payload));
+          log('tg.sendData отправлено: ' + JSON.stringify(payload));
+          // не закрываем мгновенно — можно закрыть, если хочется:
+          // if (typeof tg.close === 'function') tg.close();
+        } catch (e) {
+          log('Ошибка sendData: ' + e);
+        }
+        return;
+      }
+
+      // 2) fallback: если WebApp API недоступен, попробуем открыть ссылку на bot deep link
+      log('tg.sendData недоступен. Попробуйте открыть miniapp из Telegram или нажмите "Открыть в Telegram".');
+      alert('Откройте MiniApp из приложения Telegram (не в браузере).');
+    });
+  </script>
 </body>
 </html>
