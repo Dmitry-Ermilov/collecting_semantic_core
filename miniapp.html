@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>MiniApp Wordstat</title>
+<style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    h2 { text-align: center; }
+    input, select, button { font-size: 16px; margin: 10px 0; width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #0088cc; color: white; cursor: pointer; }
+    button:hover { background: #006699; }
+</style>
+</head>
+<body>
+
+<h2>Сбор Семантического Ядра</h2>
+
+<label>Ключевая фраза:</label>
+<input type="text" id="keyword" placeholder="Введите ключевую фразу">
+
+<label>Выберите регион:</label>
+<select id="region">
+    <option value="213">Москва</option>
+    <option value="2">Санкт-Петербург</option>
+    <option value="50">Московская область</option>
+    <option value="66">Свердловская область</option>
+    <option value="22">Краснодарский край</option>
+</select>
+
+<button id="submitBtn">📥 Получить файл</button>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+const tg = window.Telegram.WebApp;
+
+document.getElementById('submitBtn').addEventListener('click', function() {
+    const keyword = document.getElementById('keyword').value.trim();
+    const region = document.getElementById('region').value;
+
+    if (!keyword) {
+        alert("Введите ключевую фразу");
+        return;
+    }
+
+    // Отправляем данные в бота
+    tg.sendData(JSON.stringify({ keyword, region }));
+
+    tg.close();
+});
+</script>
+
+</body>
+</html>
