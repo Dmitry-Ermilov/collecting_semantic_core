@@ -45,7 +45,7 @@
       <option value="1">Россия</option>
       <option value="225">Вся Россия</option>
     </select>
-    <button id="sendBtn">📤 Отправить</button>
+    <button id="sendBtn">📤 Получить файл</button>
     <p id="status"></p>
   </div>
 
@@ -54,22 +54,21 @@
     const btn = document.getElementById("sendBtn");
     const status = document.getElementById("status");
 
-    btn.addEventListener("click", () => {
+    function sendData() {
       const phrase = document.getElementById("phrase").value;
       const region = document.getElementById("region").value;
-
       const data = { phrase, region };
 
       if (window.Telegram && Telegram.WebApp) {
-        //  Работает внутри Telegram
+        Telegram.WebApp.ready();
         Telegram.WebApp.sendData(JSON.stringify(data));
-        status.textContent = " Данные отправлены боту!";
+        status.textContent = "✅ Данные отправлены боту!";
       } else {
-        // ⚠ Работает в браузере (для теста)
-        console.log("Отладка: данные", data);
-        status.textContent = "⚠ Работает в браузере (WebApp API недоступен)";
+        status.textContent = "⚠ Откройте MiniApp через Telegram";
       }
-    });
+    }
+
+    btn.addEventListener("click", sendData);
   </script>
 </body>
 </html>
