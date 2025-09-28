@@ -1,63 +1,74 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MiniApp — СЯ</title>
+  <meta charset="UTF-8">
+  <title>MiniApp — Сбор СЯ</title>
   <style>
-    body { font-family: Arial; padding:16px; }
-    input, select { width: 100%; padding:8px; margin:8px 0; box-sizing:border-box; }
-    button { padding:10px 16px; font-size:16px; }
-    #log { margin-top:12px; color:#333; font-size:14px; white-space:pre-wrap; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #2ea44f;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #22863a;
+    }
   </style>
 </head>
 <body>
-  <h3>Сбор СЯ — MiniApp</h3>
-  <input id="phrase" placeholder="Введите фразу" />
-  <select id="region">
-    <option value="0">Россия (0)</option>
-    <option value="1">Москва (1)</option>
-  </select>
-  <button id="send">Получить файл</button>
+  <div class="container">
+    <h2>🔎 Сбор семантического ядра</h2>
+    <input id="phrase" type="text" placeholder="Введите ключевую фразу">
+    <select id="region">
+      <option value="213">Москва</option>
+      <option value="1">Россия</option>
+      <option value="225">Вся Россия</option>
+    </select>
+    <button id="sendBtn">📤 Отправить</button>
+    <p id="status"></p>
+  </div>
 
-  <div id="log"></div>
-
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    const logEl = document.getElementById('log');
-    function log(s){ console.log(s); logEl.textContent += s + '\n'; }
+    const btn = document.getElementById("sendBtn");
+    const status = document.getElementById("status");
 
-    // Telegram WebApp API
-    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if (tg) {
-      try { tg.ready(); log('WebApp ready'); } catch(e){ log('tg.ready() error: '+e); }
-    } else {
-      log('Ошибка: WebApp API не найден. Откройте этот miniapp **изнутри** приложения Telegram (кнопкой WebApp).');
-    }
+    btn.addEventListener("click", () => {
+      const phrase = document.getElementById("phrase").value;
+      const region = document.getElementById("region").value;
 
-    document.getElementById('send').addEventListener('click', function(){
-      const phrase = (document.getElementById('phrase').value || '').trim();
-      const region = document.getElementById('region').value;
+      const data = { phrase, region };
 
-      if (!phrase) { alert('Введите фразу'); return; }
-
-      const payload = { phrase, region, ts: Date.now() };
-
-      // 1) prefer tg.sendData when available
-      if (tg && typeof tg.sendData === 'function') {
-        try {
-          tg.sendData(JSON.stringify(payload));
-          log('tg.sendData отправлено: ' + JSON.stringify(payload));
-          // не закрываем мгновенно — можно закрыть, если хочется:
-          // if (typeof tg.close === 'function') tg.close();
-        } catch (e) {
-          log('Ошибка sendData: ' + e);
-        }
-        return;
+      if (window.Telegram && Telegram.WebApp) {
+        //  Работает внутри Telegram
+        Telegram.WebApp.sendData(JSON.stringify(data));
+        status.textContent = " Данные отправлены боту!";
+      } else {
+        // ⚠ Работает в браузере (для теста)
+        console.log("Отладка: данные", data);
+        status.textContent = "⚠ Работает в браузере (WebApp API недоступен)";
       }
-
-      // 2) fallback: если WebApp API недоступен, попробуем открыть ссылку на bot deep link
-      log('tg.sendData недоступен. Попробуйте открыть miniapp из Telegram или нажмите "Открыть в Telegram".');
-      alert('Откройте MiniApp из приложения Telegram (не в браузере).');
     });
   </script>
 </body>
