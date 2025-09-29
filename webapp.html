@@ -4,63 +4,90 @@
   <meta charset="UTF-8">
   <title>MiniApp: Сбор семантического ядра</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f7f7f7; }
-    .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px;
-                 border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
-    h2 { text-align: center; }
-    input, button {
-      width: 100%; padding: 10px; margin: 10px 0; font-size: 16px;
-      border-radius: 5px; border: 1px solid #ccc;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f7f7f7;
     }
-    button { background: #0088cc; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #006699; }
-    .status { text-align: center; margin-top: 15px; font-weight: bold; }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0088cc;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #006699; }
+    .status { margin-top: 15px; text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Сбор семантического ядра</h2>
-    <div id="apiStatus" class="status"></div>
     <input type="text" id="phraseInput" placeholder="Введите фразу">
     <input type="text" id="regionInput" placeholder="Введите регион">
-    <button id="sendDataBtn" disabled>Получить файл</button>
-    <div id="status" class="status"></div>
+    <button id="sendDataBtn">Получить файл</button>
+    <div class="status" id="status"></div>
   </div>
 
   <script>
-    const apiStatusDiv = document.getElementById("apiStatus");
+    // Telegram WebApp API
+    const tg = window.Telegram?.WebApp;
+    const statusDiv = document.getElementById("status");
     const phraseInput = document.getElementById("phraseInput");
     const regionInput = document.getElementById("regionInput");
     const sendBtn = document.getElementById("sendDataBtn");
-    const statusDiv = document.getElementById("status");
 
-    if (window.Telegram?.WebApp) {
-      apiStatusDiv.textContent = "✅ WebApp API доступен!";
-      apiStatusDiv.style.color = "green";
-      sendBtn.disabled = false;
-
-      const tg = window.Telegram.WebApp;
-      tg.expand();
-
-      sendBtn.addEventListener("click", () => {
-        const phrase = phraseInput.value.trim();
-        const region = regionInput.value.trim();
-
-        if (!phrase || !region) {
-          statusDiv.style.color = "red";
-          statusDiv.textContent = "Заполните оба поля!";
-          return;
-        }
-
-        tg.sendData(JSON.stringify({ phrase, region }));
-
-        statusDiv.style.color = "green";
-        statusDiv.textContent = "Данные отправлены боту!";
-      });
+    if (tg) {
+      tg.expand(); // разворачиваем окно
+      statusDiv.style.color = "green";
+      statusDiv.textContent = "✅ WebApp API доступен!";
     } else {
-      apiStatusDiv.textContent = "❌ WebApp API недоступен. Откройте через Telegram.";
-      apiStatusDiv.style.color = "red";
+      statusDiv.style.color = "red";
+      statusDiv.textContent = "❌ WebApp API недоступен. Откройте через Telegram.";
     }
+
+    sendBtn.addEventListener("click", function() {
+      const phrase = phraseInput.value.trim();
+      const region = regionInput.value.trim();
+
+      if (!phrase || !region) {
+        statusDiv.style.color = "red";
+        statusDiv.textContent = "⚠ Заполните оба поля!";
+        return;
+      }
+
+      if (!tg) {
+        statusDiv.style.color = "red";
+        statusDiv.textContent = "❌ Нет соединения с Telegram API.";
+        return;
+      }
+
+      // Отправка данных боту
+      tg.sendData(JSON.stringify({ phrase, region }));
+
+      statusDiv.style.color = "blue";
+      statusDiv.textContent = "📨 Данные отправлены... ждём ответ бота!";
+    });
   </script>
 </body>
 </html>
