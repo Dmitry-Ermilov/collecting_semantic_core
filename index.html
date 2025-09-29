@@ -1,72 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>MiniApp: Сбор семантического ядра</title>
-  <style>
-    body { font-family: Arial; margin: 20px; background: #f7f7f7; }
-    .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; }
-    input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #0088cc; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #006699; }
-    .status { margin-top: 15px; text-align: center; }
-  </style>
+<meta charset="UTF-8">
+<title>Сбор семантического ядра</title>
+<style>
+body { font-family: Arial; margin: 20px; background: #f7f7f7; }
+.container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+h2 { text-align: center; }
+input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+button { background: #0088cc; color: #fff; border: none; cursor: pointer; }
+button:hover { background: #006699; }
+.status { margin-top: 15px; text-align: center; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Сбор семантического ядра</h2>
-    <input type="text" id="phraseInput" placeholder="Введите фразу">
+<div class="container">
+  <h2>Сбор семантического ядра</h2>
+  <input id="phraseInput" placeholder="Введите фразу">
+  <select id="regionSelect">
+    <option value="0">Вся Россия</option>
+    <option value="1">Москва</option>
+    <option value="2">Санкт-Петербург</option>
+    <option value="3">Новосибирск</option>
+    <option value="4">Екатеринбург</option>
+    <option value="5">Казань</option>
+  </select>
+  <button id="sendDataBtn">Получить файл</button>
+  <div class="status" id="status"></div>
+</div>
 
-    <select id="regionSelect">
-      <option value="0">Вся Россия</option>
-      <option value="1">Москва</option>
-      <option value="2">Санкт-Петербург</option>
-      <option value="3">Новосибирск</option>
-      <option value="4">Екатеринбург</option>
-      <option value="5">Казань</option>
-    </select>
+<script>
+const tg = window.Telegram?.WebApp;
+const statusDiv = document.getElementById("status");
+const phraseInput = document.getElementById("phraseInput");
+const regionSelect = document.getElementById("regionSelect");
+const sendBtn = document.getElementById("sendDataBtn");
 
-    <button id="sendDataBtn">Получить файл</button>
-    <div class="status" id="status"></div>
-  </div>
+if (!tg) {
+  statusDiv.style.color = "red";
+  statusDiv.textContent = "❌ Откройте WebApp через Telegram бота!";
+  sendBtn.disabled = true;
+} else {
+  tg.expand();
+  statusDiv.style.color = "green";
+  statusDiv.textContent = "✅ WebApp API доступен!";
 
-  <script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram?.WebApp;
-    const statusDiv = document.getElementById("status");
-    const phraseInput = document.getElementById("phraseInput");
-    const regionSelect = document.getElementById("regionSelect");
-    const sendBtn = document.getElementById("sendDataBtn");
+  sendBtn.addEventListener("click", () => {
+    const phrase = phraseInput.value.trim();
+    const region = regionSelect.value;
 
-    if (!tg) {
-      // Если открыт вне Telegram
+    if (!phrase) {
       statusDiv.style.color = "red";
-      statusDiv.textContent = "❌ Нет соединения с Telegram API. Откройте через Telegram бота.";
-      sendBtn.disabled = true; // блокируем кнопку
-    } else {
-      // Если WebApp в Telegram
-      tg.expand();
-      statusDiv.style.color = "green";
-      statusDiv.textContent = "✅ WebApp API доступен!";
-
-      sendBtn.addEventListener("click", function() {
-        const phrase = phraseInput.value.trim();
-        const region = regionSelect.value;
-
-        if (!phrase) {
-          statusDiv.style.color = "red";
-          statusDiv.textContent = "⚠ Введите фразу!";
-          return;
-        }
-
-        // Отправка данных боту
-        tg.sendData(JSON.stringify({ phrase, region }));
-
-        statusDiv.style.color = "blue";
-        statusDiv.textContent = "📨 Данные отправлены... ждём ответ бота!";
-      });
+      statusDiv.textContent = "⚠ Введите фразу!";
+      return;
     }
-  </script>
+
+    tg.sendData(JSON.stringify({ phrase, region }));
+    statusDiv.style.color = "blue";
+    statusDiv.textContent = "📨 Данные отправлены боту...";
+  });
+}
+</script>
 </body>
 </html>
